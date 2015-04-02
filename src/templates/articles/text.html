@@ -17,6 +17,7 @@
         highlight-root
         >
         {{pdf.status}}
+        <pdf-page ng-repeat="pageNum in pdf.status.pages" pdf-page-num="pageNum"></pdf-page>
       </div>
       <div class="ph-highlight-layer" ng-if="article.pdfProgress.finished">
         <div

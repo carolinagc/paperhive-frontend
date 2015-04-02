@@ -1,4 +1,6 @@
 'use strict';
+
+var $ = require('jquery');
 var _ = require('lodash');
 var angular = require('angular');
 var PDFJS = require('pdfjs');
@@ -6,53 +8,135 @@ var PDFJS = require('pdfjs');
 module.exports = function(app) {
 
   // directive for loading a pdf
-  app.directive('pdfSrc', ['$parse', function($parse) {
+  app.directive('pdfSrc', [function() {
     return {
       restrict: 'A',
-      link: function(scope, element, attrs) {
-
-        var pdf;
+      scope: {
+        pdfSrc: '=',
+        pdfStatus: '='
+      },
+      controller: ['$scope', function($scope) {
+        var pdfSrcCtrl = this;
 
         // Note: src can be a
         //  * url string
         //  * Uint8Array with data
         //  * parameter object
         // see https://github.com/mozilla/pdf.js/blob/master/src/display/api.js
-        scope.$watch(attrs.pdfSrc, function(src) {
-          var pdfStatus = {
+        $scope.$watch('pdfSrc', function(src) {
+          var pdfStatus = $scope.pdfStatus = {
             loaded: false
           };
+
           function onProgress(progress) {
-            scope.$apply(function() {
+            $scope.$apply(function() {
               pdfStatus.bytesLoaded = progress.loaded;
               pdfStatus.bytesTotal = progress.total;
             });
           }
 
-          var pdfStatusParsed = $parse(attrs.pdfStatus);
-          if (pdfStatusParsed.assign) {
-            pdfStatusParsed.assign(scope, pdfStatus);
-          }
-
           // destroy old pdf
-          if (pdf) {
-            pdf.destroy();
-            pdf = undefined;
+          if (pdfSrcCtrl.pdf) {
+            pdfSrcCtrl.pdf.destroy();
+            pdfSrcCtrl.pdf = undefined;
           }
 
           if (src) {
             PDFJS.getDocument(src, undefined, undefined, onProgress)
-              .then(function(newPdf) {
-                scope.$apply(function() {
-                  pdf = newPdf;
+              .then(function(pdf) {
+                $scope.$apply(function() {
+                  pdfSrcCtrl.pdf = pdf;
                   pdfStatus.loaded = true;
                   pdfStatus.info = pdf.pdfInfo;
+                  pdfStatus.pages = _.range(1, pdf.numPages + 1);
                 });
               });
           }
         });
+      }]
+    };
+  }]);
+
+  // directive for showing a pdf page
+  app.directive('pdfPage', ['$parse', '$window', function($parse, $window) {
+    return {
+      restrict: 'E',
+      require: '^pdfSrc',
+      link: function(scope, element, attrs, pdfSrcCtrl) {
+        // create canvas and append to element
+        var canvas = $('<canvas>');
+
+        // create a wrapper (we need to set dimensions on the canvas' parent
+        var canvasWrapper = $('<div>');
+        canvasWrapper.append(canvas);
+        element.append(canvasWrapper);
+
+        var page;
+        var currentRenderTask;
+        var lastDimensions = {};
+
+        var render = function() {
+          if (!page) {return;}
+
+          if (currentRenderTask) {
+            currentRenderTask.cancel();
+            currentRenderTask = undefined;
+          }
+
+          // scale such that viewport fills element width
+          var viewport = page.getViewport(1.0);
+          var scale = element.width() / viewport.width;
+
+          // get updated viewport
+          viewport = page.getViewport(scale);
+
+          if (lastDimensions.width === viewport.width &&
+              lastDimensions.height === viewport.height) {
+            return;
+          }
+          lastDimensions.width = viewport.width;
+          lastDimensions.height = viewport.height;
+
+          // set canvas dimensions
+          canvas[0].width = viewport.width;
+          canvas[0].height = viewport.height;
+
+          // also set parent dimensions (otherwise a mysterious border appears)
+          canvasWrapper.css({
+            width: viewport.width + 'px',
+            height: viewport.height + 'px'
+          });
+
+          // render pdf into canvas
+          currentRenderTask = page.render({
+            canvasContext: canvas[0].getContext('2d'),
+            viewport: viewport
+          });
+          currentRenderTask.then(undefined, function(e) {
+            if (e !== 'cancelled') {
+              throw(new Error('Rendering error' + e));
+            }
+          });
+        };
+
+        // page changed
+        scope.$watch(attrs.pdfPageNum, function(pageNum) {
+          if (pageNum === undefined) {return;}
+          pdfSrcCtrl.pdf.getPage(pageNum).then(function(newPage) {
+            page = newPage;
+            render();
+          });
+        });
+
+        $($window).on('resize', render);
+        element.on('$destroy', function() {
+          $($window).off('resize', render);
+        });
       }
-      /*
+    };
+  }]);
+
+  /*
         function renderPdf () {
           var url = scope.$eval(attrs.pdfUrl);
           var textOverlay = scope.$eval(attrs.pdfTextOverlay);
@@ -266,6 +350,4 @@ module.exports = function(app) {
           }
         }
         */
-    };
-  }]);
 };
