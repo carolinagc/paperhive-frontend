@@ -4,6 +4,8 @@ var angular = require('angular');
 var PDFJS = require('pdfjs');
 
 module.exports = function(app) {
+
+  // directive for loading a pdf
   app.directive('pdfSrc', ['$parse', function($parse) {
     return {
       restrict: 'A',
@@ -49,8 +51,8 @@ module.exports = function(app) {
               });
           }
         });
-
-        /*
+      }
+      /*
         function renderPdf () {
           var url = scope.$eval(attrs.pdfUrl);
           var textOverlay = scope.$eval(attrs.pdfTextOverlay);
@@ -264,7 +266,6 @@ module.exports = function(app) {
           }
         }
         */
-      }
     };
   }]);
 };
