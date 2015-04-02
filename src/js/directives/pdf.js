@@ -1,14 +1,56 @@
 'use strict';
 var _ = require('lodash');
+var angular = require('angular');
 var PDFJS = require('pdfjs');
 
 module.exports = function(app) {
-  app.directive('pdf', ['$parse', function($parse) {
+  app.directive('pdfSrc', ['$parse', function($parse) {
     return {
-      restrict: 'E',
+      restrict: 'A',
       link: function(scope, element, attrs) {
-        scope.$watchGroup(['pdfUrl', 'pdfTextOverlay'], renderPdf);
 
+        var pdf;
+
+        // Note: src can be a
+        //  * url string
+        //  * Uint8Array with data
+        //  * parameter object
+        // see https://github.com/mozilla/pdf.js/blob/master/src/display/api.js
+        scope.$watch(attrs.pdfSrc, function(src) {
+          var pdfStatus = {
+            loaded: false
+          };
+          function onProgress(progress) {
+            scope.$apply(function() {
+              pdfStatus.bytesLoaded = progress.loaded;
+              pdfStatus.bytesTotal = progress.total;
+            });
+          }
+
+          var pdfStatusParsed = $parse(attrs.pdfStatus);
+          if (pdfStatusParsed.assign) {
+            pdfStatusParsed.assign(scope, pdfStatus);
+          }
+
+          // destroy old pdf
+          if (pdf) {
+            pdf.destroy();
+            pdf = undefined;
+          }
+
+          if (src) {
+            PDFJS.getDocument(src, undefined, undefined, onProgress)
+              .then(function(newPdf) {
+                scope.$apply(function() {
+                  pdf = newPdf;
+                  pdfStatus.loaded = true;
+                  pdfStatus.info = pdf.pdfInfo;
+                });
+              });
+          }
+        });
+
+        /*
         function renderPdf () {
           var url = scope.$eval(attrs.pdfUrl);
           var textOverlay = scope.$eval(attrs.pdfTextOverlay);
@@ -221,6 +263,7 @@ module.exports = function(app) {
             //// --------
           }
         }
+        */
       }
     };
   }]);

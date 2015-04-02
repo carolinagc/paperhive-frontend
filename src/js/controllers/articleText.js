@@ -15,6 +15,7 @@ module.exports = function(app) {
         marginDiscussionSizes: {},
         marginOffsets: {}
       };
+      $scope.pdf = {};
 
       // compute offsets of margin discussions ('boingidi')
       var updateOffsets = function() {

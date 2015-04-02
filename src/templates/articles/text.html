@@ -10,13 +10,14 @@
   </div>
   <div class="row" ng-if="article.file.url">
     <div highlight-container class="col-md-9">
-      <pdf
-        pdf-url="article.file.url"
-        pdf-text-overlay="true"
-        pdf-progress="article.pdfProgress"
+      <div
+        pdf-src="article.file.url"
+        pdf-status="pdf.status"
         on-text-select="$target && (originalComment.draft.target = $target)"
         highlight-root
-        ></pdf>
+        >
+        {{pdf.status}}
+      </div>
       <div class="ph-highlight-layer" ng-if="article.pdfProgress.finished">
         <div
           highlight-target="originalComment.draft.target"
