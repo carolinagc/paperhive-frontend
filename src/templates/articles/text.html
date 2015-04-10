@@ -16,6 +16,15 @@
         on-text-select="$target && (originalComment.draft.target = $target)"
         highlight-root
         >
+        <div ng-if="!pdf.status.loaded">
+          <progressbar class="progress-striped active"
+            value="pdf.status.bytesLoaded / pdf.status.bytesTotal"
+            max="1">
+            Loading PDF
+            ({{pdf.status.bytesLoaded / 1024 | number:0}} KB /
+            {{pdf.status.bytesTotal / 1024 | number:0}} KB)
+          </progressbar>
+        </div>
         {{pdf.status}}
         <pdf-page ng-repeat="pageNum in pdf.status.pages" pdf-page-num="pageNum"></pdf-page>
       </div>
