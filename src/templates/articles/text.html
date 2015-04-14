@@ -10,13 +10,15 @@
   </div>
   <div class="row" ng-if="article.file.url">
     <div highlight-container class="col-md-9">
-      <div
-        pdf-src="article.file.url"
-        pdf-status="pdf.status"
-        on-text-select="$target && (originalComment.draft.target = $target)"
-        highlight-root
-        >
-        <div ng-if="!pdf.status.loaded">
+      <div ng-if="!pdf.status.loaded">
+        <div ng-if="pdf.status.bytesLoaded === undefined ||
+            pdf.status.bytesTotal === undefined">
+          <progressbar class="progress-striped active" value="1" max="1">
+            Loading PDF
+          </progressbar>
+        </div>
+        <div ng-if="pdf.status.bytesLoaded !== undefined &&
+            pdf.status.bytesTotal !== undefined">
           <progressbar class="progress-striped active"
             value="pdf.status.bytesLoaded / pdf.status.bytesTotal"
             max="1">
@@ -25,8 +27,16 @@
             {{pdf.status.bytesTotal / 1024 | number:0}} KB)
           </progressbar>
         </div>
+      </div>
+      <div pdf-src="article.file.url"
+          pdf-status="pdf.status"
+          on-text-select="$target && (originalComment.draft.target = $target)"
+          highlight-root>
         {{pdf.status}}
-        <pdf-page ng-repeat="pageNum in pdf.status.pages" pdf-page-num="pageNum"></pdf-page>
+        <pdf-page ng-repeat="pageNum in pdf.status.pages"
+          pdf-page-num="pageNum"
+          pdf-text="true">
+        </pdf-page>
       </div>
       <div class="ph-highlight-layer" ng-if="article.pdfProgress.finished">
         <div

@@ -62,7 +62,15 @@ module.exports = function(app) {
     return {
       restrict: 'E',
       require: '^pdfSrc',
+      scope: {
+        pdfPageNum: '=',
+        pdfText: '='
+      },
       link: function(scope, element, attrs, pdfSrcCtrl) {
+        // options
+        var pdfText = scope.pdfText;
+        console.log(pdfText);
+
         // create canvas and append to element
         var canvas = $('<canvas>');
 
@@ -120,7 +128,7 @@ module.exports = function(app) {
         };
 
         // page changed
-        scope.$watch(attrs.pdfPageNum, function(pageNum) {
+        scope.$watch('pdfPageNum', function(pageNum) {
           if (pageNum === undefined) {return;}
           pdfSrcCtrl.pdf.getPage(pageNum).then(function(newPage) {
             page = newPage;
