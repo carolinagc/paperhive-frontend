@@ -62,35 +62,34 @@
                       aria-hidden="true"></i>
                   </div>
                 </div>
-                <div ng-show="check.article._id">
+                <div>
                   <div class="row">
                     <div class="col-sm-offset-3 col-sm-9">
-                      <p>
-                        This article has already been added to PaperHive.
-                      </p>
                       <p class="text-right">
-                        <a href="./articles/{{check.article._id}}" class="btn btn-primary">
-                          <i class="fa fa-fw fa-file-pdf-o"></i>
-                          Show article
-                        </a>
+                      <a
+                         ng-show="check.article._id"
+                         href="./articles/{{check.article._id}}"
+                         class="btn btn-primary"
+                         >
+                         <i class="fa fa-fw fa-file-pdf-o"></i>
+                         Show article
+                      </a>
+                      <button
+                            ng-show="!check.article._id"
+                            type="submit"
+                            ng-disabled="!articleNewForm.$valid || submitting"
+                            ng-click="submitApproved()"
+                            class="btn btn-primary"
+                            >
+                            <i class="fa fa-fw fa-plus" ng-show="!submitting"></i>
+                            <i class="fa fa-fw fa-spinner fa-spin" ng-show="submitting"></i>
+                            Show article
+                      </button>
                       </p>
                     </div>
                   </div>
                 </div>
                 <div ng-show="!check.article._id">
-                  <div class="row">
-                    <div class="col-sm-offset-3 col-sm-9">
-                      <p class="text-right">
-                        <button type="submit" ng-disabled="!articleNewForm.$valid || submitting"
-                            ng-click="submitApproved()"
-                            class="btn btn-primary">
-                          <i class="fa fa-fw fa-plus" ng-show="!submitting"></i>
-                          <i class="fa fa-fw fa-spinner fa-spin" ng-show="submitting"></i>
-                          Add to PaperHive
-                        </button>
-                      </p>
-                    </div>
-                  </div>
                   <div collapse="!check.article || check.article._id">
                     <div class="panel panel-default">
                       <div class="panel-body">
