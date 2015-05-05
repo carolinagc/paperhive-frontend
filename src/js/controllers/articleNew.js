@@ -18,9 +18,15 @@ module.exports = function(app) {
           })
           .error(function(data) {
             $scope.submitting = false;
+            var message;
+            if (data && data.message) {
+              message = data.message;
+            } else {
+              message = 'could not add article (unknown reason)';
+            }
             notificationService.notifications.push({
               type: 'error',
-              message: data.message || 'could not add article (unknown reason)'
+              message: message
             });
           });
 
