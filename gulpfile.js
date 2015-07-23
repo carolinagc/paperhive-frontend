@@ -111,7 +111,7 @@ gulp.task('serve-nowatch', function() {
 gulp.task('serve', ['serve:connect', 'watch', 'serve:watch']);
 
 // serve built files
-gulp.task('serve:connect', ['default:watch'], function() {
+gulp.task('serve:connect', function() {
   connect.server({
     root: 'build',
     livereload: true,
@@ -129,12 +129,12 @@ gulp.task('serve:reload', function() {
 });
 
 // watch built files and initiate live reload
-gulp.task('serve:watch', ['default:watch'], function() {
+gulp.task('serve:watch', function() {
   gulp.watch(paths.build, ['serve:reload']);
 });
 
 // test
-gulp.task('test', ['serve-nowatch'], function() {
+gulp.task('test-protractor', ['serve-nowatch'], function() {
   gulp.src(['./test/protractor/*.js'])
   .pipe(protractor({
     configFile: 'test/protractor/protractor.js'
