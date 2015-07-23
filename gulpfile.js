@@ -13,10 +13,7 @@ var streamify = require('gulp-streamify');
 var minifyCSS = require('gulp-minify-css');
 var htmlmin = require('gulp-htmlmin');
 var _ = require('lodash');
-var protractor = require("gulp-protractor").protractor;
-var htmlhint = require("gulp-htmlhint");
-var jscs = require('gulp-jscs');
-var jscsStylish = require('gulp-jscs-stylish');
+var protractor = require('gulp-protractor').protractor;
 var template = require('gulp-template');
 var connectHistory = require('connect-history-api-fallback');
 
@@ -37,10 +34,6 @@ var htmlminOpts = {
   removeComments: true
 };
 
-var htmlhintOpts = {
-  "doctype-first": false
-};
-
 // error handling, simplified version (without level) from
 // http://www.artandlogic.com/blog/2014/05/error-handling-in-gulp/
 function handleError(error) {
@@ -56,8 +49,8 @@ function js (watch) {
   var shim = require('browserify-shim');
   var watchify = require('watchify');
 
-  var browserify_args = _.extend(watchify.args, {debug: true});
-  var bundler = browserify('./src/js/index.js', browserify_args);
+  var browserifyArgs = _.extend(watchify.args, {debug: true});
+  var bundler = browserify('./src/js/index.js', browserifyArgs);
 
   // use shims defined in package.json via 'browser' and 'browserify-shim'
   // properties
@@ -86,30 +79,17 @@ function js (watch) {
 }
 
 // bundle once
-gulp.task('js', ['templates'], function () {
+gulp.task('js', ['templates'], function() {
   return js(false);
 });
 
 // bundle with watch
-gulp.task('js:watch', ['templates'], function () {
+gulp.task('js:watch', ['templates'], function() {
   return js(true);
 });
 
-gulp.task('jscs', function () {
-  return gulp.src(['./src/js/**/*.js', './test/**/*.js'])
-    .pipe(jscs())
-    .pipe(jscsStylish());  // log style errors
-});
-
-gulp.task('htmlhint', function() {
-  return gulp.src([paths.index, paths.templates], {base: 'src'})
-    .pipe(htmlhint(htmlhintOpts))
-    .pipe(htmlhint.reporter())
-    .pipe(htmlhint.failReporter());
-});
-
 // bundle html templates via angular's templateCache
-gulp.task('templates', function () {
+gulp.task('templates', function() {
   var templateCache = require('gulp-angular-templatecache');
 
   return gulp.src(paths.templates, {base: 'src'})
@@ -125,7 +105,7 @@ gulp.task('templates', function () {
 });
 
 // copy static files
-gulp.task('static', function () {
+gulp.task('static', function() {
   var index = gulp.src(paths.index, {base: 'src'})
     .pipe(template({config: config}))
     .pipe(debug ? gutil.noop() : htmlmin(htmlminOpts))
@@ -143,8 +123,8 @@ gulp.task('static', function () {
   var leaflet = gulp.src('bower_components/leaflet/dist/images/*')
     .pipe(gulp.dest('build/assets/leaflet/images'));
 
-  var mathjax_base = 'bower_components/MathJax/';
-  var mathjax_src = _.map([
+  var mathjaxBase = 'bower_components/MathJax/';
+  var mathjaxSrc = _.map([
     'MathJax.js',
     'config/TeX-AMS_HTML-full.js',
     'config/Safe.js',
@@ -153,9 +133,9 @@ gulp.task('static', function () {
     'jax/element/**',
     'jax/output/HTML-CSS/**'
   ], function(path) {
-    return mathjax_base + path;
+    return mathjaxBase + path;
   });
-  var mathjax = gulp.src(mathjax_src, {base: mathjax_base})
+  var mathjax = gulp.src(mathjaxSrc, {base: mathjaxBase})
     .pipe(gulp.dest('build/assets/mathjax'));
 
   var pdfjs = gulp.src('bower_components/pdfjs-dist/build/pdf.worker.js')
@@ -170,7 +150,7 @@ gulp.task('static', function () {
 });
 
 // compile less to css
-gulp.task('style', function () {
+gulp.task('style', function() {
   return gulp.src('src/less/index.less')
     .pipe(sourcemaps.init())
     .pipe(less())
@@ -189,14 +169,14 @@ gulp.task('clean', function(cb) {
 });
 
 // watch for changes
-gulp.task('watch', ['default:watch'], function () {
+gulp.task('watch', ['default:watch'], function() {
   gulp.watch(paths.templates, ['templates']);
   gulp.watch([paths.images, paths.index], ['static']);
   gulp.watch(paths.less, ['style']);
 });
 
 // serve without watchin (no livereload)
-gulp.task('serve-nowatch', function () {
+gulp.task('serve-nowatch', function() {
   connect.server({
     root: 'build'
   });
@@ -206,7 +186,7 @@ gulp.task('serve-nowatch', function () {
 gulp.task('serve', ['serve:connect', 'watch', 'serve:watch']);
 
 // serve built files
-gulp.task('serve:connect', ['default:watch'], function () {
+gulp.task('serve:connect', ['default:watch'], function() {
   connect.server({
     root: 'build',
     livereload: true,
@@ -218,21 +198,21 @@ gulp.task('serve:connect', ['default:watch'], function () {
 });
 
 // live reload
-gulp.task('serve:reload', function () {
+gulp.task('serve:reload', function() {
   gulp.src(paths.build)
     .pipe(connect.reload());
 });
 
 // watch built files and initiate live reload
-gulp.task('serve:watch', ['default:watch'], function () {
+gulp.task('serve:watch', ['default:watch'], function() {
   gulp.watch(paths.build, ['serve:reload']);
 });
 
 // test
-gulp.task('test', ['serve-nowatch'], function () {
-  gulp.src(["./test/protractor/*.js"])
+gulp.task('test', ['serve-nowatch'], function() {
+  gulp.src(['./test/protractor/*.js'])
   .pipe(protractor({
-    configFile: "test/protractor/protractor.js"
+    configFile: 'test/protractor/protractor.js'
   }))
   .on('error', handleError)
   .on('end', function(e) {
@@ -240,10 +220,9 @@ gulp.task('test', ['serve-nowatch'], function () {
   });
 });
 
-
 gulp.task(
   'default',
-  ['jscs', 'htmlhint', 'js', 'templates', 'static', 'style']
+  ['js', 'templates', 'static', 'style']
 );
 gulp.task(
   'default:watch',
