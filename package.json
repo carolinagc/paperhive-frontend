@@ -19,7 +19,7 @@
     "lint:jscs": "jscs --reporter ./node_modules/jscs-stylish *.js src test",
     "lint:jshint": "jshint *.js src test",
     "lint:less": "lessc --lint src/less/index.less",
-    "test": "npm run test:karma",
+    "test": "npm run test:karma && npm run test:protractor",
     "test:karma": "karma start --single-run",
     "test:protractor": "gulp test-protractor"
   },
