@@ -3,15 +3,19 @@
   "version": "0.0.0",
   "description": "PaperHive frontend",
   "scripts": {
-    "build": "mkdir -p build && npm run build:css && npm run build:js && npm run build:static",
-    "build:debug": "npm run build:css:debug",
+    "build": "mkdir -p build tmp && npm run build:css && npm run build:js && npm run build:static",
+    "build:debug": "mkdir -p build tmp && npm run build:css:debug && npm run build:js:debug && npm run build:static:debug",
+    "build:watch": "mkdir -p build  tmp && npm run build:css:watch & npm run build:js:watch & npm run build:static:watch",
     "build:css": "lessc --source-map --source-map-less-inline --clean-css=\"--skip-restructuring\" src/less/index.less build/index.css",
     "build:css:debug": "lessc --source-map --source-map-less-inline src/less/index.less build/index.css",
+    "build:css:watch": "watch 'npm run build:css:debug' src/less",
     "build:js": "npm run build:js:browserify && uglifyjs build/index.js --compress --mangle --comments --in-source-map build/index.js.map --source-map build/index.js.map --source-map-url index.js.map -o build/index.js",
     "build:js:debug": "npm run build:js:browserify",
     "build:js:browserify": "npm run build:templates && browserify src/js/index.js -d | exorcist build/index.js.map --url index.js.map > build/index.js",
-    "build:js:watch": "watchify src/js/index.js -d -o build/index.js -v",
+    "build:js:watch": "npm run build:templates && watchify src/js/index.js -d -o build/index.js -v",
     "build:static": "gulp static",
+    "build:static:debug": "DEBUG=1 gulp static",
+    "build:static:watch": "watch 'npm run build:static:debug' src/img",
     "build:templates": "gulp templates",
     "clean": "rm -rf build/* tmp/*",
     "lint": "npm run lint:html && npm run lint:jshint && npm run lint:jscs && npm run lint:less",
@@ -19,6 +23,7 @@
     "lint:jscs": "jscs --reporter ./node_modules/jscs-stylish *.js src test",
     "lint:jshint": "jshint *.js src test",
     "lint:less": "lessc --lint src/less/index.less",
+    "serve": "npm run build:watch & gulp serve",
     "test": "npm run test:karma && npm run test:protractor",
     "test:karma": "karma start --single-run",
     "test:protractor": "gulp test-protractor"
@@ -61,6 +66,7 @@
     "uglify-js": "^2.4.24",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
+    "watch": "^0.16.0",
     "watchify": "^3.3.0"
   },
   "browser": {

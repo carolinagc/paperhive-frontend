@@ -108,7 +108,7 @@ gulp.task('serve-nowatch', function() {
 });
 
 // serve with livereload
-gulp.task('serve', ['serve:connect', 'watch', 'serve:watch']);
+gulp.task('serve', ['serve:connect', 'serve:watch']);
 
 // serve built files
 gulp.task('serve:connect', function() {
@@ -124,13 +124,13 @@ gulp.task('serve:connect', function() {
 
 // live reload
 gulp.task('serve:reload', function() {
-  gulp.src(paths.build)
+  gulp.src('build')
     .pipe(connect.reload());
 });
 
 // watch built files and initiate live reload
 gulp.task('serve:watch', function() {
-  gulp.watch(paths.build, ['serve:reload']);
+  gulp.watch('build/**/*', ['serve:reload']);
 });
 
 // test
