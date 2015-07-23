@@ -3,10 +3,11 @@
   "version": "0.0.0",
   "description": "PaperHive frontend",
   "scripts": {
-    "lint": "npm run lint:html && npm run lint:jshint && npm run lint:jscs",
+    "lint": "npm run lint:html && npm run lint:jshint && npm run lint:jscs && npm run lint:less",
     "lint:html": "htmlhint src/index.html src/templates",
     "lint:jscs": "jscs --reporter ./node_modules/jscs-stylish *.js src test",
     "lint:jshint": "jshint *.js src test",
+    "lint:less": "lessc --lint src/less/index.less",
     "test": "npm run lint && npm run test:karma",
     "test:karma": "karma start --single-run"
   },
@@ -41,6 +42,7 @@
     "karma": "^0.13.2",
     "karma-jasmine": "^0.3.6",
     "karma-phantomjs-launcher": "^0.2.0",
+    "less": "^2.5.1",
     "lodash": "~3.8.0",
     "merge-stream": "^0.1.7",
     "vinyl-buffer": "^1.0.0",
