@@ -107,6 +107,9 @@ gulp.task('serve-nowatch', function() {
   });
 });
 
+var aggregate = require('gulp-aggregate');
+var watch = require('gulp-watch');
+
 // serve with livereload
 gulp.task('serve', ['serve:connect', 'serve:watch']);
 
@@ -122,15 +125,13 @@ gulp.task('serve:connect', function() {
   });
 });
 
-// live reload
-gulp.task('serve:reload', function() {
-  gulp.src('build')
-    .pipe(connect.reload());
-});
-
 // watch built files and initiate live reload
 gulp.task('serve:watch', function() {
-  gulp.watch('build/**/*', ['serve:reload']);
+  watch(paths.build)
+    .pipe(aggregate({debounce: 500}, function(agg) {
+      console.log('reload!');
+      return agg.pipe(connect.reload());
+    }));
 });
 
 // test
