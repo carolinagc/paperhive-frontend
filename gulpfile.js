@@ -3,7 +3,6 @@
 var gulp = require('gulp');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
-var less = require('gulp-less');
 var merge = require('merge-stream');
 var connect = require('gulp-connect');
 var sourcemaps = require('gulp-sourcemaps');
@@ -25,7 +24,6 @@ var paths = {
   templates: 'src/templates/**/*.html',
   images: 'src/img/**/*',
   index: 'src/index.html',
-  less: 'src/less/**/*.less',
   build: 'build/**/*'
 };
 
@@ -149,30 +147,10 @@ gulp.task('static', function() {
                mathjax, pdfjs, roboto);
 });
 
-// compile less to css
-gulp.task('style', function() {
-  return gulp.src('src/less/index.less')
-    .pipe(sourcemaps.init())
-    .pipe(less())
-    .on('error', handleError)
-    .pipe(debug ? gutil.noop() : minifyCSS({
-      restructuring: false
-    }))
-    .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest('build'));
-});
-
-gulp.task('clean', function(cb) {
-  var del = require('del');
-
-  del(['build/*', 'tmp/*'], cb);
-});
-
 // watch for changes
 gulp.task('watch', ['default:watch'], function() {
   gulp.watch(paths.templates, ['templates']);
   gulp.watch([paths.images, paths.index], ['static']);
-  gulp.watch(paths.less, ['style']);
 });
 
 // serve without watchin (no livereload)
@@ -222,9 +200,9 @@ gulp.task('test', ['serve-nowatch'], function() {
 
 gulp.task(
   'default',
-  ['js', 'templates', 'static', 'style']
+  ['js', 'templates', 'static']
 );
 gulp.task(
   'default:watch',
-  ['js:watch', 'templates', 'static', 'style']
+  ['js:watch', 'templates', 'static']
 );
