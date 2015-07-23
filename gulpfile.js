@@ -1,7 +1,6 @@
 'use strict';
 
 var gulp = require('gulp');
-var gulpif = require('gulp-if');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var less = require('gulp-less');
@@ -15,7 +14,6 @@ var minifyCSS = require('gulp-minify-css');
 var htmlmin = require('gulp-htmlmin');
 var _ = require('lodash');
 var protractor = require("gulp-protractor").protractor;
-var jshint = require("gulp-jshint");
 var htmlhint = require("gulp-htmlhint");
 var jscs = require('gulp-jscs');
 var jscsStylish = require('gulp-jscs-stylish');
@@ -95,13 +93,6 @@ gulp.task('js', ['templates'], function () {
 // bundle with watch
 gulp.task('js:watch', ['templates'], function () {
   return js(true);
-});
-
-gulp.task('jshint', function() {
-  return gulp.src(['./src/js/**/*.js', './test/**/*.js'])
-    .pipe(jshint())
-    .pipe(jshint.reporter('default'))
-    .pipe(jshint.reporter('fail'));
 });
 
 gulp.task('jscs', function () {
@@ -252,7 +243,7 @@ gulp.task('test', ['serve-nowatch'], function () {
 
 gulp.task(
   'default',
-  ['jshint', 'jscs', 'htmlhint', 'js', 'templates', 'static', 'style']
+  ['jscs', 'htmlhint', 'js', 'templates', 'static', 'style']
 );
 gulp.task(
   'default:watch',
