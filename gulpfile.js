@@ -1,15 +1,11 @@
 'use strict';
 
 var gulp = require('gulp');
-var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
 var merge = require('merge-stream');
 var connect = require('gulp-connect');
-var sourcemaps = require('gulp-sourcemaps');
 var gutil = require('gulp-util');
 var uglify = require('gulp-uglify');
 var streamify = require('gulp-streamify');
-var minifyCSS = require('gulp-minify-css');
 var htmlmin = require('gulp-htmlmin');
 var _ = require('lodash');
 var protractor = require('gulp-protractor').protractor;
@@ -38,53 +34,6 @@ function handleError(error) {
   gutil.log(error);
   process.exit(1);
 }
-
-// bundle js files + dependencies with browserify
-// (and continue to do so on updates)
-// see https://github.com/gulpjs/gulp/blob/master/docs/recipes/fast-browserify-builds-with-watchify.md
-function js (watch) {
-  var browserify = require('browserify');
-  var shim = require('browserify-shim');
-  var watchify = require('watchify');
-
-  var browserifyArgs = _.extend(watchify.args, {debug: true});
-  var bundler = browserify('./src/js/index.js', browserifyArgs);
-
-  // use shims defined in package.json via 'browser' and 'browserify-shim'
-  // properties
-  bundler.transform(shim);
-
-  // register watchify
-  if (watch) {
-    bundler = watchify(bundler);
-  }
-
-  function rebundle () {
-    return bundler.bundle()
-      .on('error', handleError)
-      .pipe(source('index.js'))
-      .pipe(buffer())
-      //.pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(debug ? gutil.noop() : streamify(uglify({
-          preserveComments: 'some'
-        })))
-      //.pipe(sourcemaps.write('./'))
-      .pipe(gulp.dest('build'));
-  }
-  bundler.on('update', rebundle);
-
-  return rebundle();
-}
-
-// bundle once
-gulp.task('js', ['templates'], function() {
-  return js(false);
-});
-
-// bundle with watch
-gulp.task('js:watch', ['templates'], function() {
-  return js(true);
-});
 
 // bundle html templates via angular's templateCache
 gulp.task('templates', function() {
@@ -147,16 +96,14 @@ gulp.task('static', function() {
                mathjax, pdfjs, roboto);
 });
 
-// watch for changes
-gulp.task('watch', ['default:watch'], function() {
-  gulp.watch(paths.templates, ['templates']);
-  gulp.watch([paths.images, paths.index], ['static']);
-});
-
 // serve without watchin (no livereload)
 gulp.task('serve-nowatch', function() {
   connect.server({
-    root: 'build'
+    root: 'build',
+    middleware: function(connect, opt) {
+      // default to index.html
+      return [connectHistory()];
+    }
   });
 });
 
@@ -197,12 +144,3 @@ gulp.task('test', ['serve-nowatch'], function() {
     connect.serverClose();
   });
 });
-
-gulp.task(
-  'default',
-  ['js', 'templates', 'static']
-);
-gulp.task(
-  'default:watch',
-  ['js:watch', 'templates', 'static']
-);

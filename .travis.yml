@@ -14,8 +14,9 @@ before_script:
   - npm update
   - npm prune
 script:
-  - gulp
-  - npm test
+  - npm run lint
+  - npm run build
+  - npm run test
   - gulp test
 sudo: false
 cache:

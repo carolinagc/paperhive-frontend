@@ -3,11 +3,15 @@
   "version": "0.0.0",
   "description": "PaperHive frontend",
   "scripts": {
-    "build": "npm run build:css",
+    "build": "mkdir -p build && npm run build:css && npm run build:js && npm run build:static",
     "build:debug": "npm run build:css:debug",
     "build:css": "lessc --source-map --source-map-less-inline --clean-css=\"--skip-restructuring\" src/less/index.less build/index.css",
     "build:css:debug": "lessc --source-map --source-map-less-inline src/less/index.less build/index.css",
-    "build:js": "",
+    "build:js": "npm run build:js:browserify && uglifyjs build/index.js --compress --mangle --comments --in-source-map build/index.js.map --source-map build/index.js.map --source-map-url index.js.map -o build/index.js",
+    "build:js:debug": "npm run build:js:browserify",
+    "build:js:browserify": "npm run build:templates && browserify src/js/index.js -d | exorcist build/index.js.map --url index.js.map > build/index.js",
+    "build:js:watch": "watchify src/js/index.js -d -o build/index.js -v",
+    "build:static": "gulp static",
     "build:templates": "gulp templates",
     "clean": "rm -rf build/* tmp/*",
     "lint": "npm run lint:html && npm run lint:jshint && npm run lint:jscs && npm run lint:less",
@@ -15,7 +19,7 @@
     "lint:jscs": "jscs --reporter ./node_modules/jscs-stylish *.js src test",
     "lint:jshint": "jshint *.js src test",
     "lint:less": "lessc --lint src/less/index.less",
-    "test": "npm run lint && npm run test:karma",
+    "test": "npm run test:karma",
     "test:karma": "karma start --single-run"
   },
   "author": "Nico Schlömer <nico.schloemer@gmail.com>",
@@ -27,6 +31,7 @@
     "browserify-shim": "^3.8.10",
     "clean-css": "^3.3.6",
     "connect-history-api-fallback": "^1.1.0",
+    "exorcist": "^0.4.0",
     "gulp": "^3.8.11",
     "gulp-angular-templatecache": "^1.6.0",
     "gulp-connect": "^2.2.0",
@@ -52,9 +57,10 @@
     "less-plugin-clean-css": "^1.5.1",
     "lodash": "~3.8.0",
     "merge-stream": "^0.1.7",
+    "uglify-js": "^2.4.24",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
-    "watchify": "^3.1.2"
+    "watchify": "^3.3.0"
   },
   "browser": {
     "angular": "./bower_components/angular/angular.js",
@@ -78,6 +84,11 @@
     "rangy-classapplier": "./bower_components/rangy/rangy-classapplier.js",
     "rangy-highlighter": "./bower_components/rangy/rangy-highlighter.js",
     "rangy-serializer": "./bower_components/rangy/rangy-serializer.js"
+  },
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
   },
   "browserify-shim": {
     "angular": {
